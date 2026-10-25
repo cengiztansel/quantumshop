@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: quantumshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+
+  template:
+    metadata:
+      labels:
+        app: user-service
+
+    spec:
+      containers:
+        - name: user-service
+          image: cengiztansel/user-service:v5
+          imagePullPolicy: Always
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8085
+            failureThreshold: 18
+            periodSeconds: 10
+            timeoutSeconds: 10
+            initialDelaySeconds: 60
+           
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8085
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 15
+            failureThreshold: 15
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8085
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 15
+            failureThreshold: 15
+
+          ports:
+            - containerPort: 8085
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "k8s"
+
+#            - name: JAVA_TOOL_OPTIONS
+#              value: "-Xms256m -Xmx512m"
+
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-db-secret
+                  key: POSTGRES_USERNAME
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-db-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://discovery-service:9090/eureka/"
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-jwt-secret
+                  key: JWT_SECRET
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "500Mi"
+            limits:
+              cpu: "1"
+              memory: "1200Mi"

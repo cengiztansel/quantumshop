@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: product-service
+  namespace: quantumshop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: product-service
+
+  template:
+    metadata:
+      labels:
+        app: product-service
+
+    spec:
+      containers:
+        - name: product-service
+          image: cengiztansel/product-service:v12
+          imagePullPolicy: Always
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            failureThreshold: 60
+            periodSeconds: 7
+            timeoutSeconds: 7
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 7
+            failureThreshold: 7
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 7
+            failureThreshold: 7
+
+          ports:
+            - containerPort: 8081
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: product-config
+                  key: SPRING_PROFILES_ACTIVE
+
+#            - name: JAVA_TOOL_OPTIONS
+#              value: "-Xms128m -Xmx256m"
+
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USERNAME
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "500Mi"
+
+            limits:
+              cpu: "1"
+              memory: "1200Mi"

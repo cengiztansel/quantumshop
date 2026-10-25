@@ -1,0 +1,10 @@
+.git/
+.idea/
+.vscode/
+*.iml
+README.md
+
+
+target/classes/
+target/test-classes/
+target/generated-sources/

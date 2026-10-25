@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: quantumshop-config
+  namespace: quantumshop
+
+data:
+  DB_HOST: product-db
+  EUREKA_URL: http://discovery-service:9090/eureka/
+  RABBIT_HOST: notification-mq
+  REDIS_HOST: basket-cache
+  SPRING_PROFILES_ACTIVE: local

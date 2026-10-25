@@ -1,0 +1,108 @@
+services:
+
+  user-service:
+    build:
+      context: ../user-service
+    container_name: store-user-api
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - product-db
+
+
+  product-service:
+    build:
+      context: ../product-service
+    container_name: product-service
+    ports:
+      - "8081:8081"
+    environment:
+      # ÖNEMLİ: Docker içinde localhost yerine servis adını (product-db) kullanıyoruz
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-db:5432/product_db
+      SPRING_DATASOURCE_USERNAME: cengiz
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_THREADS_VIRTUAL_ENABLED: "true"
+    depends_on:
+      - product-db
+      - notification-mq
+
+    # VERİ TABANI ARAYÜZÜ-GUI : Verileri görsel izlemek için
+  adminer:
+    image: adminer:latest
+    container_name: store-db-admin
+    ports:
+      - "8082:8080"
+    depends_on:
+      - product-db
+
+
+
+  # 1. VERİ TABANI: Ürün bilgileri burada duracak
+  product-db:
+    image: postgres:16
+    container_name: store-postgres
+    environment:
+      POSTGRES_USER: cengiz
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: product_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. CACHE (ÖNBELLEK): Sepet ve hızlı sorgular için
+  basket-cache:
+    image: redis:7
+    container_name: store-redis
+    ports:
+      - "6379:6379"
+
+  # 3. MESSAGE BROKER: Servisler arası haberleşme
+  notification-mq:
+    image: rabbitmq:3-management
+    container_name: store-rabbitmq
+    ports:
+      - "5672:5672"   # Mesaj trafiği için
+      - "15672:15672" # Dashboard (Görsel arayüz) için
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  # BASKET SERVICE: Redis kullanan sepet modülümüz
+  basket-service:
+    build: ../basket-service
+    container_name: store-basket-api
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATA_REDIS_HOST: basket-cache
+      SPRING_RABBITMQ_HOST: notification-mq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+    depends_on:
+      - basket-cache
+      - notification-mq
+    
+
+  # 4. API GATEWAY: Dış dünyanın kapısı
+  api-gateway:
+    image: bitnami/nginx:latest
+    container_name: store-nginx
+    volumes:
+      - ../api-gateway/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf:ro
+
+    ports:
+      - "8080:8080"
+    depends_on:
+      - product-db
+      - basket-cache
+      - product-service
+      - basket-service
+
+
+volumes:
+  postgres_data:

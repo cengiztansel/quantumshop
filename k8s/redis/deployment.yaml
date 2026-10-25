@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: basket-cache
+  namespace: quantumshop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: basket-cache
+
+  template:
+
+    metadata:
+      labels:
+        app: basket-cache
+
+    spec:
+
+      containers:
+
+      - name: redis
+
+        image: redis:7
+
+        ports:
+
+        - containerPort: 6379

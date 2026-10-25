@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basket-service
+  namespace: quantumshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: basket-service
+  template:
+    metadata:
+      labels:
+        app: basket-service
+    spec:
+      containers:
+      - name: basket-service
+        image: cengiztansel/basket-service:v1
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 8083
+
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: k8s
+
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          failureThreshold: 60
+          periodSeconds: 7
+          timeoutSeconds: 7
+
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8083
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 7
+          failureThreshold: 7
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 7
+          failureThreshold: 7
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "500Mi"
+          limits:
+            cpu: "1"
+            memory: "1200Mi"

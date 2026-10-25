@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: discovery-service
+  namespace: quantumshop
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: discovery-service
+
+  template:
+    metadata:
+      labels:
+        app: discovery-service
+
+    spec:
+      containers:
+        - name: discovery
+          image: cengiztansel/discovery-service:v3
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 9090
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9090
+            failureThreshold: 60
+            periodSeconds: 7
+            timeoutSeconds: 7
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 7        # 1s'den yükseltildi
+            failureThreshold: 7
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 7        
+            failureThreshold: 7
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "500Mi"
+            limits:
+              cpu: "500m"
+              memory: "1200Mi"

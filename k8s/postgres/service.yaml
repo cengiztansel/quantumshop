@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: product-db
+  namespace: quantumshop
+
+spec:
+
+  selector:
+    app: product-db
+
+  ports:
+
+  - port: 5432
+    targetPort: 5432
+
+  type: ClusterIP
