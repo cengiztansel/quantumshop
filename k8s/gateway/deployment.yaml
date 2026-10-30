@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: cengiztansel/gateway-service:v12
+        image: cengiztansel/gateway-service:v13
         imagePullPolicy: Always
 
         startupProbe:
@@ -68,7 +68,7 @@ spec:
           # - name: JAVA_TOOL_OPTIONS
           #   value: "-Xms128m -Xmx256m"
           - name: JWT_ENABLED
-            value: "false"
+            value: "true"
           - name: EUREKA_URL
             valueFrom:
               configMapKeyRef:

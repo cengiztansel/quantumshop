@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { fetchProducts } from '../api/shop'
 import type { Product } from '../types'
 
-// Ürünler bir kez çekilir ve sayfalar arasında paylaşılır
+// Ürünler bir kez çekilir ve sayfalar arasında paylaşılır; reload() önbelleği temizleyip yeniden çeker
 let cache: Product[] | null = null
 let inflight: Promise<Product[]> | null = null
 
@@ -25,6 +25,7 @@ export function useProducts() {
   const [products, setProducts] = useState<Product[]>(cache ?? [])
   const [loading, setLoading] = useState(cache === null)
   const [error, setError] = useState('')
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -43,7 +44,14 @@ export function useProducts() {
     return () => {
       cancelled = true
     }
+  }, [version])
+
+  const reload = useCallback(() => {
+    cache = null
+    inflight = null
+    setLoading(true)
+    setVersion((v) => v + 1)
   }, [])
 
-  return { products, loading, error }
+  return { products, loading, error, reload }
 }

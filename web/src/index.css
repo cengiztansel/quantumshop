@@ -164,3 +164,17 @@ section { margin-bottom: 40px; }
   .cart-line { grid-template-columns: 56px 1fr; }
   .line-controls { grid-column: 1 / -1; justify-content: space-between; }
 }
+
+
+/* admin */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; }
+.form-grid .full { grid-column: 1 / -1; }
+textarea.input { min-height: 80px; resize: vertical; font: inherit; }
+.form-actions { display: flex; gap: 10px; margin-top: 14px; }
+.table-wrap { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; }
+table.data th, table.data td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+table.data th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.row-actions { display: flex; gap: 6px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }

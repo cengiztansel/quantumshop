@@ -19,7 +19,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <>
-        <Link to="/" className="back">← Back to shop</Link>
+        <Link to="/shop" className="back">← Back to shop</Link>
         <p>Product not found.</p>
       </>
     )
@@ -29,7 +29,7 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Link to="/" className="back">← Back to shop</Link>
+      <Link to="/shop" className="back">← Back to shop</Link>
       <div className="detail">
         <ProductVisual name={product.name} sku={product.sku} category={product.category} large />
         <div>

@@ -51,3 +51,11 @@ export interface CartItem {
   quantity: number
   stock: number
 }
+
+export interface ProductInput {
+  sku: string
+  name: string
+  description: string
+  price: number
+  stockQuantity: number
+}

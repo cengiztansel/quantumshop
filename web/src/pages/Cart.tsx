@@ -51,7 +51,7 @@ export default function Cart() {
       <div className="panel empty">
         <h2>Your cart is empty</h2>
         <p className="muted">Find something you like in the shop.</p>
-        <Link to="/" className="btn btn-primary">Browse products</Link>
+        <Link to="/shop" className="btn btn-primary">Browse products</Link>
       </div>
     )
   }

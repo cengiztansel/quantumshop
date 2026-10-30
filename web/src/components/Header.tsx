@@ -14,8 +14,10 @@ export default function Header() {
           🛍️ Quantum<span>Shop</span>
         </Link>
         <nav className="nav">
-          <NavLink to="/" end>Shop</NavLink>
+          <NavLink to="/" end>Home</NavLink>
+          <NavLink to="/shop">Shop</NavLink>
           <NavLink to="/orders">Orders</NavLink>
+          {session?.role === 'ADMIN' && <NavLink to="/admin/products">Admin</NavLink>}
         </nav>
         <div className="header-actions">
           <Link to="/cart" className="cart-link" aria-label="Cart">

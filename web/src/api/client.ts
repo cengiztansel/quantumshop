@@ -19,11 +19,17 @@ export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler
 }
 
-// Backend bazen JSON ({message}), bazen düz metin döner (gateway: "JWT token missing")
+// Backend bazen JSON ({message} veya doğrulama için {errors:{alan:mesaj}}), bazen düz metin döner
 async function readMessage(res: Response): Promise<string> {
   const text = await res.text()
   try {
-    const json = JSON.parse(text) as { message?: string; error?: string }
+    const json = JSON.parse(text) as { message?: string; error?: string; errors?: Record<string, string> }
+    if (json.errors && typeof json.errors === 'object') {
+      const details = Object.entries(json.errors)
+        .map(([field, msg]) => `${field}: ${msg}`)
+        .join('; ')
+      return details ? `${json.error ?? 'Validation failed'} (${details})` : (json.error ?? text)
+    }
     return json.message || json.error || text
   } catch {
     return text || `${res.status} ${res.statusText}`
@@ -49,6 +55,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
   // Token varken 401 = oturum süresi dolmuş; token yokken (yanlış parola) çıkış yaptırma
   if (res.status === 401 && token) onUnauthorized()
+  if (res.status === 403) throw new ApiError(403, 'You do not have permission to do this (ADMIN role required).')
   if (!res.ok) throw new ApiError(res.status, await readMessage(res))
   if (res.status === 204) return null as unknown as T
 
@@ -59,6 +66,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const http = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
+  put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: (path: string) => request<null>('DELETE', path),
 }

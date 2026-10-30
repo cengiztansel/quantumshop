@@ -1,5 +1,5 @@
 import { categoryCode } from '../lib/format'
-import type { AuthResponse, Order, OrderStatus, Page, Product, ProductDto } from '../types'
+import type { AuthResponse, Order, OrderStatus, Page, Product, ProductDto, ProductInput } from '../types'
 import { http } from './client'
 
 function toProduct(dto: ProductDto): Product {
@@ -16,10 +16,14 @@ function toProduct(dto: ProductDto): Product {
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  const data = await http.get<Page<ProductDto> | ProductDto[]>('/products')
+  const data = await http.get<Page<ProductDto> | ProductDto[]>('/products?size=100')
   const list = Array.isArray(data) ? data : data.content
   return list.filter((p) => p.active !== false).map(toProduct)
 }
+
+export const createProduct = (input: ProductInput) => http.post<ProductDto>('/products', input)
+export const updateProduct = (id: number, input: ProductInput) => http.put<ProductDto>(`/products/${id}`, input)
+export const deleteProduct = (id: number) => http.delete(`/products/${id}`)
 
 export const login = (username: string, password: string) =>
   http.post<AuthResponse>('/auth/login', { username, password })
