@@ -1,6 +1,6 @@
 # QuantumShop: Cloud-Native E-Commerce on Kubernetes
 
-A full-stack e-commerce demo: a **React + TypeScript** storefront served by **Nginx**, in front of a
+A full-stack e-commerce App: a **React + TypeScript** storefront served by **Nginx**, in front of a
 **Spring Boot microservices** backend (API gateway, service discovery, JWT security with roles,
 RabbitMQ events), all running on **Kubernetes**.
 
